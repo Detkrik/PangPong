@@ -136,21 +136,22 @@
     const INITIAL_PADDLE_WIDTH = 10;  // Сохраняем исходную ширину
     const INITIAL_PADDLE_HEIGHT = 60;
     const INITIAL_BALL_SIZE = 10;
+    const INITIAL_BALL_SPEED = 5; // Исходная скорость мяча
 
     // Переменные, которые будут изменяться
     let paddleWidth;
     let paddleHeight;
     let ballSize;
+    let ballSpeedX;
+    let ballSpeedY;
 
     // Позиции ракеток
     let playerPaddleY;
     let botPaddleY;
 
-    // Позиция мяча и направление движения
+    // Позиция мяча
     let ballX;
     let ballY;
-    let ballSpeedX;
-    let ballSpeedY;
 
     // Скорость движения ракеток
     let paddleSpeed = 10;
@@ -164,12 +165,13 @@
     let downInterval;
 
     // Функция для изменения размеров canvas
+
+
     function resizeCanvas() {
         canvas.width = window.innerWidth * 0.8;
         canvas.height = window.innerHeight * 0.6;
 
-        // Обновляем размеры игровых элементов, сохраняя пропорции
-        paddleWidth = INITIAL_PADDLE_WIDTH * (canvas.width / 600); // Масштабируем ширину ракетки
+        paddleWidth = INITIAL_PADDLE_WIDTH * (canvas.width / 600);
         paddleHeight = canvas.height * 0.15;
         ballSize = canvas.width * 0.02;
 
@@ -178,15 +180,10 @@
 
         ballX = canvas.width / 2;
         ballY = canvas.height / 2;
-        ballSpeedX = 5;
-        ballSpeedY = 5;
 
-        // ВАЖНО:  Пересчитываем координаты ракеток и мяча после изменения размера canvas.
-        playerPaddleY = canvas.height / 2 - paddleHeight / 2;
-        botPaddleY = canvas.height / 2 - paddleHeight / 2;
-        ballX = canvas.width / 2;
-        ballY = canvas.height / 2;
-
+        // Адаптируем скорость мяча к ширине экрана
+        ballSpeedX = INITIAL_BALL_SPEED * (canvas.width / 600);
+        ballSpeedY = INITIAL_BALL_SPEED * (canvas.height / 400);
     }
 
     // Функция для рисования ракетки
@@ -215,7 +212,7 @@
         playerPaddleY = Math.max(0, Math.min(playerPaddleY, canvas.height - paddleHeight));
     }
 
-    // Обработчики событий для кнопок "Вверх"
+   // Обработчики событий для кнопок "Вверх" (ПК и мобильные)
     upButton.addEventListener('mousedown', function () {
         upInterval = setInterval(movePaddleUp, 20);
     });
@@ -225,8 +222,16 @@
     upButton.addEventListener('mouseleave', function () {
         clearInterval(upInterval);
     });
+    upButton.addEventListener('touchstart', function (event) {
+        event.preventDefault();
+        upInterval = setInterval(movePaddleUp, 20);
+    });
+    upButton.addEventListener('touchend', function (event) {
+        event.preventDefault();
+        clearInterval(upInterval);
+    });
 
-    // Обработчики событий для кнопок "Вниз"
+    // Обработчики событий для кнопок "Вниз" (ПК и мобильные)
     downButton.addEventListener('mousedown', function () {
         downInterval = setInterval(movePaddleDown, 20);
     });
@@ -234,6 +239,14 @@
         clearInterval(downInterval);
     });
     downButton.addEventListener('mouseleave', function () {
+        clearInterval(downInterval);
+    });
+    downButton.addEventListener('touchstart', function (event) {
+        event.preventDefault();
+        downInterval = setInterval(movePaddleDown, 20);
+    });
+    downButton.addEventListener('touchend', function (event) {
+        event.preventDefault();
         clearInterval(downInterval);
     });
 
@@ -295,7 +308,7 @@
     function resetBall() {
         ballX = canvas.width / 2;
         ballY = canvas.height / 2;
-        ballSpeedX = Math.random() > 0.5 ? 5 : -5;
+        ballSpeedX = Math.random() > 0.5 ? INITIAL_BALL_SPEED * (canvas.width / 600) : -INITIAL_BALL_SPEED * (canvas.width / 600);
         ballSpeedY = Math.random() * 4 - 2;
     }
 
@@ -312,7 +325,7 @@
 
         resizeCanvas();
 
-        gameInterval = setInterval(function () {
+        gameInterval= setInterval(function () {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawPaddle(0, playerPaddleY);
             drawPaddle(canvas.width - paddleWidth, botPaddleY);
@@ -329,7 +342,7 @@
 
     playButton.addEventListener('click', startGame);
 
-    restartButton.addEventListener('click', function() {
+    restartButton.addEventListener('click', function () {
         endScreen.style.display = 'none';
         startGame();
     });
