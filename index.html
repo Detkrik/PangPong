@@ -100,7 +100,7 @@
 </div>
 
 <div id="game-screen" style="display: none;">
-    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <canvas id="gameCanvas"></canvas>
     <div class="score-panel">
         <div>Игрок: <span id="player-score">0</span></div>
         <div>Бот: <span id="bot-score">0</span></div>
@@ -134,19 +134,18 @@
     const downButton = document.getElementById('down-button');
 
     // Размеры ракеток и мяча
-    const paddleWidth = 10;
-    const paddleHeight = 60;
-    const ballSize = 10;
+    let paddleWidth = 10;
+    let paddleHeight = 60;
+    let ballSize = 10;
 
     // Позиции ракеток
-    let playerPaddleY = canvas.height / 2 - paddleHeight / 2;
-    let botPaddleY = canvas.height / 2 - paddleHeight / 2;
-
+    let playerPaddleY;
+    let botPaddleY;
     // Позиция мяча и направление движения
-    let ballX = canvas.width / 2;
-    let ballY = canvas.height / 2;
-    let ballSpeedX = 5;
-    let ballSpeedY = 5;
+    let ballX;
+    let ballY;
+    let ballSpeedX;
+    let ballSpeedY;
 
     // Скорость движения ракеток
     let paddleSpeed = 10;  // Увеличиваем скорость ракетки
@@ -159,6 +158,24 @@
     let upInterval;
     let downInterval;
 
+    // Функция для изменения размеров canvas
+    function resizeCanvas() {
+        canvas.width = window.innerWidth * 0.8;  // Занимает 80% ширины экрана
+        canvas.height = window.innerHeight * 0.6; // Занимает 60% высоты экрана
+
+        // Обновляем размеры и позиции элементов игры
+        paddleHeight = canvas.height * 0.15; // Рассчитываем высоту ракетки
+        ballSize = canvas.width * 0.02;
+
+        playerPaddleY = canvas.height / 2 - paddleHeight / 2;
+        botPaddleY = canvas.height / 2 - paddleHeight / 2;
+
+        ballX = canvas.width / 2;
+        ballY = canvas.height / 2;
+        ballSpeedX = 5;
+        ballSpeedY = 5;
+
+    }
 
     // Функция для рисования ракетки
     function drawPaddle(x, y) {
@@ -177,7 +194,7 @@
     // Функция для движения вверх
     function movePaddleUp() {
         playerPaddleY -= paddleSpeed;
-        playerPaddleY = Math.max(0, Math.min(playerPaddleY, canvas.height - paddleHeight));
+playerPaddleY = Math.max(0, Math.min(playerPaddleY, canvas.height - paddleHeight));
     }
 
     // Функция для движения вниз
@@ -296,7 +313,7 @@
     // Функция для запуска игры
     function startGame() {
         startScreen.style.display = 'none';
-        gameScreen.style.display = 'block';
+gameScreen.style.display = 'block';
         endScreen.style.display = 'none';
 
         // Сбрасываем счет и позицию мяча
@@ -305,13 +322,7 @@
         playerScoreElement.textContent = playerScore;
         botScoreElement.textContent = botScore;
 
-        ballX = canvas.width / 2;
-        ballY = canvas.height / 2;
-        ballSpeedX = 5;
-        ballSpeedY = 5;
-        playerPaddleY = canvas.height / 2 - paddleHeight / 2;
-        botPaddleY = canvas.height/ 2 - paddleHeight / 2;
-
+        resizeCanvas();
 
         // Запускаем игровой цикл
         gameInterval = setInterval(function () {
@@ -354,6 +365,12 @@
         stopGame();
         startScreen.style.display = 'block';
     });
+
+    // Вызываем resizeCanvas при загрузке страницы и при изменении размеров окна
+    window.addEventListener('load', resizeCanvas);
+    window.addEventListener('resize', resizeCanvas);
+
+
 </script>
 </body>
 </html>
