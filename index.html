@@ -8,19 +8,19 @@
         body {
             font-family: sans-serif;
             text-align: center;
-            background-color: #000; /* Черный фон */
-            color: white; /* Белый текст */
-            margin: 0; /* Убираем отступы body */
-            overflow: hidden; /* Предотвращаем полосы прокрутки */
-            height: 100vh; /* Занимаем всю высоту экрана */
+            background-color: #000;
+            color: white;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Центрируем по вертикали */
-            align-items: center; /* Центрируем по горизонтали */
+            justify-content: center;
+            align-items: center;
         }
 
         .blue-button {
-            background-color: #4CAF50;
+            background-color: #5DADE2;
             border: none;
             color: white;
             padding: 15px 32px;
@@ -30,13 +30,12 @@
             font-size: 16px;
             margin: 4px 2px;
             cursor: pointer;
-            background-color: #5DADE2;
         }
 
         #gameCanvas {
             background-color: #000;
-            display: block; /* Убираем отступы canvas */
-            border: 2px solid #5DADE2; /* Голубая рамка */
+            display: block;
+            border: 2px solid #5DADE2;
         }
 
         #score {
@@ -45,30 +44,29 @@
         }
 
         .paddle-button {
-            padding: 10px 20px; /* Увеличиваем размер кнопок */
-            font-size: 20px; /* Увеличиваем шрифт */
-            margin: 10px; /* Увеличиваем отступы */
+            padding: 10px 20px;
+            font-size: 20px;
+            margin: 10px;
             cursor: pointer;
-            background-color: #3498db; /* Другой цвет для кнопок */
+            background-color: #3498db;
             color: white;
             border: none;
-            border-radius: 5px; /* Закругленные углы */
+            border-radius: 5px;
         }
 
-        #game-screen > div { /* Центрируем кнопки */
+        #game-screen > div {
             text-align: center;
             margin-top: 10px;
         }
 
-        /* Адаптация под мобильные устройства */
         @media (max-width: 600px) {
             .paddle-button {
-                padding: 15px 30px; /* Делаем кнопки больше на маленьких экранах */
+                padding: 15px 30px;
                 font-size: 24px;
             }
 
             #score {
-                font-size: 24px; /* Делаем счет больше на маленьких экранах */
+                font-size: 24px;
             }
         }
 
@@ -79,6 +77,7 @@
             object-fit: cover;
             margin-bottom: 20px;
         }
+
         .score-panel {
             display: flex;
             justify-content: space-around;
@@ -125,22 +124,28 @@
     const playButton = document.getElementById('play-button');
     const restartButton = document.getElementById('restart-button');
     const menuButton = document.getElementById('menu-button');
-    const menuInGameButton = document.getElementById('menu-ingame-button');  // Кнопка меню в игре
+    const menuInGameButton = document.getElementById('menu-ingame-button');
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const playerScoreElement = document.getElementById('player-score');
-    const botScoreElement = document.getElementById('bot-score');    // Элемент для счета бота
+    const botScoreElement = document.getElementById('bot-score');
     const upButton = document.getElementById('up-button');
     const downButton = document.getElementById('down-button');
 
-    // Размеры ракеток и мяча
-    let paddleWidth = 10;
-    let paddleHeight = 60;
-    let ballSize = 10;
+    // Размеры ракеток и мяча (теперь константы, чтобы избежать случайного изменения)
+    const INITIAL_PADDLE_WIDTH = 10;  // Сохраняем исходную ширину
+    const INITIAL_PADDLE_HEIGHT = 60;
+    const INITIAL_BALL_SIZE = 10;
+
+    // Переменные, которые будут изменяться
+    let paddleWidth;
+    let paddleHeight;
+    let ballSize;
 
     // Позиции ракеток
     let playerPaddleY;
     let botPaddleY;
+
     // Позиция мяча и направление движения
     let ballX;
     let ballY;
@@ -148,11 +153,11 @@
     let ballSpeedY;
 
     // Скорость движения ракеток
-    let paddleSpeed = 10;  // Увеличиваем скорость ракетки
+    let paddleSpeed = 10;
 
     // Переменные для счета игрока и бота
     let playerScore = 0;
-    let botScore = 0;  // Счет бота
+    let botScore = 0;
 
     // Переменные для хранения интервалов движения
     let upInterval;
@@ -160,11 +165,12 @@
 
     // Функция для изменения размеров canvas
     function resizeCanvas() {
-        canvas.width = window.innerWidth * 0.8;  // Занимает 80% ширины экрана
-        canvas.height = window.innerHeight * 0.6; // Занимает 60% высоты экрана
+        canvas.width = window.innerWidth * 0.8;
+        canvas.height = window.innerHeight * 0.6;
 
-        // Обновляем размеры и позиции элементов игры
-        paddleHeight = canvas.height * 0.15; // Рассчитываем высоту ракетки
+        // Обновляем размеры игровых элементов, сохраняя пропорции
+        paddleWidth = INITIAL_PADDLE_WIDTH * (canvas.width / 600); // Масштабируем ширину ракетки
+        paddleHeight = canvas.height * 0.15;
         ballSize = canvas.width * 0.02;
 
         playerPaddleY = canvas.height / 2 - paddleHeight / 2;
@@ -174,6 +180,12 @@
         ballY = canvas.height / 2;
         ballSpeedX = 5;
         ballSpeedY = 5;
+
+        // ВАЖНО:  Пересчитываем координаты ракеток и мяча после изменения размера canvas.
+        playerPaddleY = canvas.height / 2 - paddleHeight / 2;
+        botPaddleY = canvas.height / 2 - paddleHeight / 2;
+        ballX = canvas.width / 2;
+        ballY = canvas.height / 2;
 
     }
 
@@ -194,7 +206,7 @@
     // Функция для движения вверх
     function movePaddleUp() {
         playerPaddleY -= paddleSpeed;
-playerPaddleY = Math.max(0, Math.min(playerPaddleY, canvas.height - paddleHeight));
+        playerPaddleY = Math.max(0, Math.min(playerPaddleY, canvas.height - paddleHeight));
     }
 
     // Функция для движения вниз
@@ -205,40 +217,35 @@ playerPaddleY = Math.max(0, Math.min(playerPaddleY, canvas.height - paddleHeight
 
     // Обработчики событий для кнопок "Вверх"
     upButton.addEventListener('mousedown', function () {
-        upInterval = setInterval(movePaddleUp, 20); // Двигаем ракетку каждые 20 мс
+        upInterval = setInterval(movePaddleUp, 20);
     });
     upButton.addEventListener('mouseup', function () {
-        clearInterval(upInterval); // Останавливаем движение
+        clearInterval(upInterval);
     });
-    upButton.addEventListener('mouseleave', function () {  // Останавливаем, если курсор покинул кнопку
+    upButton.addEventListener('mouseleave', function () {
         clearInterval(upInterval);
     });
 
-
     // Обработчики событий для кнопок "Вниз"
     downButton.addEventListener('mousedown', function () {
-        downInterval = setInterval(movePaddleDown, 20); // Двигаем ракетку каждые 20 мс
+        downInterval = setInterval(movePaddleDown, 20);
     });
     downButton.addEventListener('mouseup', function () {
-        clearInterval(downInterval); // Останавливаем движение
+        clearInterval(downInterval);
     });
-    downButton.addEventListener('mouseleave', function () { // Останавливаем, если курсор покинул кнопку
+    downButton.addEventListener('mouseleave', function () {
         clearInterval(downInterval);
     });
 
     // Функция для движения ракетки бота
     function moveBotPaddle() {
-        // Простейший AI: просто следит за мячом
         if (botPaddleY + paddleHeight / 2 < ballY) {
-            botPaddleY += 2; //  Немного медленнее, чем скорость игрока
+            botPaddleY += 2;
         } else if (botPaddleY + paddleHeight / 2 > ballY) {
             botPaddleY -= 2;
         }
-
-        // Ограничение движения ракеток по высоте
         botPaddleY = Math.max(0, Math.min(botPaddleY, canvas.height - paddleHeight));
     }
-
 
     // Функция для обновления позиции мяча
     function updateBall() {
@@ -251,30 +258,16 @@ playerPaddleY = Math.max(0, Math.min(playerPaddleY, canvas.height - paddleHeight
         }
 
         // Отскок от ракеток
-        if (
-            ballX - ballSize < paddleWidth &&
-            ballY > playerPaddleY &&
-            ballY < playerPaddleY + paddleHeight
-        ) {
+        if (ballX - ballSize < paddleWidth && ballY > playerPaddleY && ballY < playerPaddleY + paddleHeight) {
             ballSpeedX = -ballSpeedX;
-            // Увеличиваем скорость мяча после отбития
             ballSpeedX *= 1.1;
             ballSpeedY *= 1.1;
-
-            // Увеличиваем счет игрока
             playerScore++;
             playerScoreElement.textContent = playerScore;
         }
 
-
-        if (
-            ballX + ballSize > canvas.width - paddleWidth &&
-
-            ballY > botPaddleY &&
-            ballY < botPaddleY + paddleHeight
-        ) {
+        if (ballX + ballSize > canvas.width - paddleWidth && ballY > botPaddleY && ballY < botPaddleY + paddleHeight) {
             ballSpeedX = -ballSpeedX;
-             // Увеличиваем скорость мяча после отбития
             ballSpeedX *= 1.1;
             ballSpeedY *= 1.1;
             playerScore++;
@@ -288,35 +281,30 @@ playerPaddleY = Math.max(0, Math.min(playerPaddleY, canvas.height - paddleHeight
             resetBall();
         }
 
-
         // Если мяч улетел за ракетку бота, увеличиваем счет игрока
         if (ballX + ballSize > canvas.width) {
             playerScore++;
             playerScoreElement.textContent = playerScore;
             resetBall();
         }
-
     }
 
-
-    let gameInterval; // Переменная для хранения интервала игры
+    let gameInterval;
 
     // Функция для сброса мяча в центр после гола
     function resetBall() {
         ballX = canvas.width / 2;
         ballY = canvas.height / 2;
-        ballSpeedX = Math.random() > 0.5 ? 5 : -5;  // Случайное направление
-        ballSpeedY = Math.random() * 4 - 2; // Случайная скорость по Y
+        ballSpeedX = Math.random() > 0.5 ? 5 : -5;
+        ballSpeedY = Math.random() * 4 - 2;
     }
-
 
     // Функция для запуска игры
     function startGame() {
         startScreen.style.display = 'none';
-gameScreen.style.display = 'block';
+        gameScreen.style.display = 'block';
         endScreen.style.display = 'none';
 
-        // Сбрасываем счет и позицию мяча
         playerScore = 0;
         botScore = 0;
         playerScoreElement.textContent = playerScore;
@@ -324,35 +312,26 @@ gameScreen.style.display = 'block';
 
         resizeCanvas();
 
-        // Запускаем игровой цикл
         gameInterval = setInterval(function () {
-            // Очищаем canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Рисуем ракетки и мяч
             drawPaddle(0, playerPaddleY);
             drawPaddle(canvas.width - paddleWidth, botPaddleY);
             drawBall();
-
-            // Обновляем позиции
             updateBall();
             moveBotPaddle();
-        }, 1000 / 60); // 60 кадров в секунду
+        }, 1000 / 60);
     }
 
     function stopGame() {
         clearInterval(gameInterval);
         gameScreen.style.display = 'none';
-
     }
 
-    // Обработчики событий для кнопок
     playButton.addEventListener('click', startGame);
 
-    restartButton.addEventListener('click', function () {
+    restartButton.addEventListener('click', function() {
         endScreen.style.display = 'none';
         startGame();
-
     });
 
     menuButton.addEventListener('click', function () {
@@ -360,7 +339,6 @@ gameScreen.style.display = 'block';
         startScreen.style.display = 'block';
     });
 
-    // Обработчик кнопки "Меню" в игре
     menuInGameButton.addEventListener('click', function () {
         stopGame();
         startScreen.style.display = 'block';
@@ -369,7 +347,6 @@ gameScreen.style.display = 'block';
     // Вызываем resizeCanvas при загрузке страницы и при изменении размеров окна
     window.addEventListener('load', resizeCanvas);
     window.addEventListener('resize', resizeCanvas);
-
 
 </script>
 </body>
